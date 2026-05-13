@@ -1,0 +1,386 @@
+// Compralo — core data model (SQLite variant for local dev).
+//
+// PRODUCTION TARGET IS POSTGRES. This SQLite schema diverges in two ways:
+//   1. All enums are TEXT (Prisma does not support enums on SQLite). Allowed
+//      values are enforced in TS via `packages/db/src/enums.ts`.
+//   2. All `Json` columns are stored as TEXT (stringified). Services that
+//      surface them to clients JSON.parse() on the way out.
+// When we move to Postgres, restore enum blocks and `Json` types — the field
+// names and shapes do not change.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Users & Auth ----------
+
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  phone           String?  @unique
+  emailVerified   Boolean  @default(false)
+  phoneVerified   Boolean  @default(false)
+  passwordHash    String?
+  displayName     String
+  avatarUrl       String?
+  role            String   @default("buyer")
+  market          String
+  preferredLocale String   @default("en")
+  kycStatus       String   @default("none")
+  kycProvider     String?
+  kycReference    String?
+  ratingAvg       Float    @default(0)
+  ratingCount     Int      @default(0)
+  responseTimeMin Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sellerProfile  SellerProfile?
+  listings       Listing[]
+  buyerOrders    Order[]         @relation("BuyerOrders")
+  sellerOrders   Order[]         @relation("SellerOrders")
+  offers         Offer[]         @relation("OffersFromBuyer")
+  sentMessages   Message[]       @relation("MessagesSent")
+  threadMembers  ThreadMember[]
+  reviewsAuthored Review[]       @relation("ReviewsAuthored")
+  reviewsReceived Review[]       @relation("ReviewsReceived")
+  savedSearches  SavedSearch[]
+  favorites      Favorite[]
+  sessions       Session[]
+
+  @@index([market])
+  @@index([role])
+}
+
+model SellerProfile {
+  userId             String   @id
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  legalName          String?
+  taxId              String?
+  businessRegistered Boolean  @default(false)
+  payoutProvider     String?
+  payoutAccountId    String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ---------- Catalog & Listings ----------
+
+model Category {
+  id              String     @id
+  parentId        String?
+  parent          Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children        Category[] @relation("CategoryTree")
+  slugEn          String     @unique
+  slugEs          String     @unique
+  nameEn          String
+  nameEs          String
+  isLeaf          Boolean    @default(false)
+  isVehicle       Boolean    @default(false)
+  sortOrder       Int        @default(0)
+  attributeSchema String?    // JSON Schema, stringified
+  listings        Listing[]
+
+  @@index([parentId])
+  @@index([isVehicle])
+}
+
+model Listing {
+  id              String          @id @default(cuid())
+  sellerId        String
+  seller          User            @relation(fields: [sellerId], references: [id])
+  categoryId      String
+  category        Category        @relation(fields: [categoryId], references: [id])
+
+  title           String
+  description     String
+  priceCents      BigInt
+  currency        String
+  condition       String
+  quantity        Int             @default(1)
+  saleType        String          @default("fixed")
+
+  locationLabel   String
+  locationLat     Float
+  locationLng     Float
+  market          String
+
+  localeOrigin    String
+  translations    String?         // stringified JSON
+
+  attributes      String?         // stringified JSON
+
+  status          String          @default("draft")
+  publishedAt     DateTime?
+  soldAt          DateTime?
+  expiresAt       DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  viewCount       Int             @default(0)
+
+  vehicle         VehicleListing?
+  images          ListingImage[]
+  videos          ListingVideo[]
+  offers          Offer[]
+  orders          Order[]
+  favorites       Favorite[]
+  threads         MessageThread[]
+  moderationEvents ModerationEvent[]
+  reviews         Review[]
+
+  @@index([sellerId])
+  @@index([categoryId])
+  @@index([market, status])
+  @@index([status, publishedAt(sort: Desc)])
+}
+
+model VehicleListing {
+  listingId        String   @id
+  listing          Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  make             String
+  model            String
+  year             Int
+  trim             String?
+  vin              String
+  mileage          Int
+  mileageUnit      String
+  transmission     String
+  fuelType         String
+  bodyStyle        String
+  drivetrain       String
+  exteriorColor    String?
+  interiorColor    String?
+  doors            Int?
+  seats            Int?
+  accidentHistory  String   @default("unknown")
+  titleStatus      String
+  serviceRecords   Boolean  @default(false)
+  previousOwners   Int?
+  vinDecoded       String?  // stringified JSON
+  vinVerified      Boolean  @default(false)
+
+  @@index([make, model, year])
+  @@index([vin])
+}
+
+model ListingImage {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url       String
+  altEn     String?
+  altEs     String?
+  width     Int?
+  height    Int?
+  pHash     String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([listingId])
+  @@index([pHash])
+}
+
+model ListingVideo {
+  id           String   @id @default(cuid())
+  listingId    String
+  listing      Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url          String
+  thumbnailUrl String?
+  durationSec  Int?
+  sortOrder    Int      @default(0)
+}
+
+model Favorite {
+  userId    String
+  listingId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, listingId])
+}
+
+model SavedSearch {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  query       String?
+  filters     String   // stringified JSON
+  market      String
+  locale      String
+  notifyEmail Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ---------- Offers, Orders, Payments ----------
+
+model Offer {
+  id          String    @id @default(cuid())
+  listingId   String
+  listing     Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerId     String
+  buyer       User      @relation("OffersFromBuyer", fields: [buyerId], references: [id])
+  amountCents BigInt
+  currency    String
+  message     String?
+  status      String    @default("pending")
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([listingId])
+  @@index([buyerId])
+}
+
+model Order {
+  id              String    @id @default(cuid())
+  listingId       String
+  listing         Listing   @relation(fields: [listingId], references: [id])
+  buyerId         String
+  buyer           User      @relation("BuyerOrders", fields: [buyerId], references: [id])
+  sellerId        String
+  seller          User      @relation("SellerOrders", fields: [sellerId], references: [id])
+  grossCents      BigInt
+  commissionCents BigInt
+  netCents        BigInt
+  currency        String
+  market          String
+  status          String    @default("pending")
+  shippingAddress String?   // stringified JSON
+  trackingNumber  String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  payments        Payment[]
+
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([status])
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider    String
+  providerRef String
+  amountCents BigInt
+  currency    String
+  status      String   @default("initiated")
+  raw         String?  // stringified JSON
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([providerRef])
+}
+
+// ---------- Messaging ----------
+
+model MessageThread {
+  id        String         @id @default(cuid())
+  listingId String?
+  listing   Listing?       @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  members   ThreadMember[]
+  messages  Message[]
+
+  @@index([listingId])
+}
+
+model ThreadMember {
+  threadId   String
+  userId     String
+  thread     MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastReadAt DateTime?
+
+  @@id([threadId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id        String        @id @default(cuid())
+  threadId  String
+  thread    MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User          @relation("MessagesSent", fields: [senderId], references: [id])
+  body      String
+  createdAt DateTime      @default(now())
+
+  @@index([threadId, createdAt])
+}
+
+// ---------- Reviews ----------
+
+model Review {
+  id        String   @id @default(cuid())
+  listingId String?
+  listing   Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  authorId  String
+  author    User     @relation("ReviewsAuthored", fields: [authorId], references: [id])
+  subjectId String
+  subject   User     @relation("ReviewsReceived", fields: [subjectId], references: [id])
+  rating    Int
+  body      String?
+  createdAt DateTime @default(now())
+
+  @@unique([listingId, authorId])
+  @@index([subjectId])
+}
+
+// ---------- Moderation ----------
+
+model ModerationEvent {
+  id         String   @id @default(cuid())
+  listingId  String
+  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  decision   String
+  reason     String?
+  notes      String?
+  automated  Boolean  @default(true)
+  reviewerId String?
+  signals    String?  // stringified JSON
+  createdAt  DateTime @default(now())
+
+  @@index([listingId])
+  @@index([decision])
+}
+
+// ---------- Catalog seed data for vehicles ----------
+
+model VehicleMake {
+  id     String         @id @default(cuid())
+  name   String         @unique
+  models VehicleModel[]
+}
+
+model VehicleModel {
+  id     String      @id @default(cuid())
+  makeId String
+  make   VehicleMake @relation(fields: [makeId], references: [id], onDelete: Cascade)
+  name   String
+
+  @@unique([makeId, name])
+}

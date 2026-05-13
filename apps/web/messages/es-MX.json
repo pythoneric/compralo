@@ -1,0 +1,67 @@
+{
+  "site": {
+    "name": "Compralo",
+    "tagline": "Compra y vende nuevo y usado — incluyendo autos."
+  },
+  "nav": {
+    "search": "Buscar",
+    "sell": "Vender",
+    "messages": "Mensajes",
+    "dashboard": "Panel",
+    "signIn": "Iniciar sesión"
+  },
+  "search": {
+    "placeholder": "Busca lo que sea — incluyendo autos",
+    "submit": "Buscar",
+    "resultsCount": "{count, plural, =0 {Sin resultados} one {# resultado} other {# resultados}}",
+    "filters": {
+      "title": "Filtros",
+      "price": "Precio",
+      "condition": "Condición",
+      "distance": "Distancia",
+      "make": "Marca",
+      "model": "Modelo",
+      "yearRange": "Año",
+      "maxMileage": "Kilometraje máx."
+    }
+  },
+  "condition": {
+    "new": "Nuevo",
+    "like_new": "Como nuevo",
+    "used_good": "Usado — bueno",
+    "used_fair": "Usado — aceptable",
+    "for_parts": "Para refacciones"
+  },
+  "listing": {
+    "messageSeller": "Mensaje al vendedor",
+    "makeOffer": "Hacer una oferta",
+    "buyNow": "Comprar ahora",
+    "scheduleTestDrive": "Agendar prueba de manejo",
+    "specs": "Especificaciones",
+    "vin": "VIN",
+    "mileage": "Kilometraje",
+    "transmission": "Transmisión",
+    "fuelType": "Combustible",
+    "bodyStyle": "Carrocería",
+    "drivetrain": "Tracción",
+    "titleStatus": "Factura/Título",
+    "accidentHistory": "Historial de choques",
+    "previousOwners": "Dueños anteriores"
+  },
+  "sell": {
+    "title": "Vende en Compralo",
+    "vinPrompt": "¿Vendes un auto? Captura el VIN para autollenar los datos.",
+    "next": "Continuar",
+    "publish": "Publicar"
+  },
+  "dashboard": {
+    "title": "Panel del vendedor",
+    "listings": "Mis publicaciones",
+    "messages": "Mensajes",
+    "payouts": "Pagos"
+  },
+  "common": {
+    "loading": "Cargando…",
+    "viewAll": "Ver todos"
+  }
+}

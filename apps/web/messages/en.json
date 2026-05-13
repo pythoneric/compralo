@@ -1,0 +1,67 @@
+{
+  "site": {
+    "name": "Compralo",
+    "tagline": "Buy and sell new and used — including cars."
+  },
+  "nav": {
+    "search": "Search",
+    "sell": "Sell",
+    "messages": "Messages",
+    "dashboard": "Dashboard",
+    "signIn": "Sign in"
+  },
+  "search": {
+    "placeholder": "Search for anything — including cars",
+    "submit": "Search",
+    "resultsCount": "{count, plural, =0 {No results} one {# result} other {# results}}",
+    "filters": {
+      "title": "Filters",
+      "price": "Price",
+      "condition": "Condition",
+      "distance": "Distance",
+      "make": "Make",
+      "model": "Model",
+      "yearRange": "Year",
+      "maxMileage": "Max mileage"
+    }
+  },
+  "condition": {
+    "new": "New",
+    "like_new": "Like new",
+    "used_good": "Used — good",
+    "used_fair": "Used — fair",
+    "for_parts": "For parts"
+  },
+  "listing": {
+    "messageSeller": "Message seller",
+    "makeOffer": "Make an offer",
+    "buyNow": "Buy now",
+    "scheduleTestDrive": "Schedule test drive",
+    "specs": "Specifications",
+    "vin": "VIN",
+    "mileage": "Mileage",
+    "transmission": "Transmission",
+    "fuelType": "Fuel type",
+    "bodyStyle": "Body style",
+    "drivetrain": "Drivetrain",
+    "titleStatus": "Title status",
+    "accidentHistory": "Accident history",
+    "previousOwners": "Previous owners"
+  },
+  "sell": {
+    "title": "Sell on Compralo",
+    "vinPrompt": "Selling a vehicle? Enter the VIN to autofill specs.",
+    "next": "Continue",
+    "publish": "Publish"
+  },
+  "dashboard": {
+    "title": "Seller dashboard",
+    "listings": "My listings",
+    "messages": "Messages",
+    "payouts": "Payouts"
+  },
+  "common": {
+    "loading": "Loading…",
+    "viewAll": "View all"
+  }
+}
