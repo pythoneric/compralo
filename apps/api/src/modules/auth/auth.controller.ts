@@ -1,12 +1,12 @@
 import { Body, Controller, Post, UnauthorizedException } from "@nestjs/common";
-import { IsEmail, IsString, MinLength } from "class-validator";
+import { IsEmail, IsIn, IsNotEmpty, IsString, MinLength } from "class-validator";
 import { AuthService } from "./auth.service";
 
 class SignUpDto {
   @IsEmail() email!: string;
   @IsString() @MinLength(8) password!: string;
-  @IsString() displayName!: string;
-  @IsString() market!: "US" | "MX";
+  @IsString() @IsNotEmpty() displayName!: string;
+  @IsIn(["US", "MX"]) market!: "US" | "MX";
 }
 
 class SignInDto {

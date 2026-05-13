@@ -29,3 +29,9 @@ pnpm-debug.log*
 *.db-journal
 *.db-wal
 *.db-shm
+
+# Python (test suite)
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
