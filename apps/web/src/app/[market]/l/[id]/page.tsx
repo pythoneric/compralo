@@ -65,14 +65,15 @@ export default async function ListingPage({
 }
 
 function Gallery({ images, alt }: { images: { url: string; altEn?: string; altEs?: string }[]; alt: string }) {
-  if (images.length === 0) {
+  const [hero, ...rest] = images;
+  if (!hero) {
     return <div className="aspect-[4/3] rounded-lg bg-slate-100" />;
   }
   return (
     <div className="grid gap-2 sm:grid-cols-[2fr_1fr]">
-      <img src={images[0].url} alt={alt} className="aspect-[4/3] w-full rounded-lg object-cover" />
+      <img src={hero.url} alt={alt} className="aspect-[4/3] w-full rounded-lg object-cover" />
       <div className="grid grid-rows-2 gap-2">
-        {images.slice(1, 3).map((img, i) => (
+        {rest.slice(0, 2).map((img, i) => (
           <img key={i} src={img.url} alt={alt} className="h-full w-full rounded-lg object-cover" />
         ))}
       </div>

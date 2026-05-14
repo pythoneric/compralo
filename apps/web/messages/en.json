@@ -63,5 +63,15 @@
   "common": {
     "loading": "Loading…",
     "viewAll": "View all"
+  },
+  "signIn": {
+    "title": "Sign in",
+    "subtitle": "Welcome back to Compralo.",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "invalid": "Invalid email or password.",
+    "rateLimited": "Too many attempts. Please wait a moment and try again."
   }
 }
