@@ -63,5 +63,15 @@
   "common": {
     "loading": "Cargando…",
     "viewAll": "Ver todos"
+  },
+  "signIn": {
+    "title": "Iniciar sesión",
+    "subtitle": "Bienvenido de vuelta a Compralo.",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "submit": "Iniciar sesión",
+    "submitting": "Iniciando sesión…",
+    "invalid": "Correo o contraseña incorrectos.",
+    "rateLimited": "Demasiados intentos. Espera un momento e inténtalo de nuevo."
   }
 }
