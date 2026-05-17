@@ -1,5 +1,5 @@
 import { Body, Controller, Param, Patch, Post } from "@nestjs/common";
-import { IsInt, IsString, Min } from "class-validator";
+import { IsIn, IsInt, IsOptional, IsString, Min } from "class-validator";
 import { OffersService } from "./offers.service";
 
 class CreateOfferDto {
@@ -10,8 +10,8 @@ class CreateOfferDto {
 }
 
 class RespondOfferDto {
-  @IsString() decision!: "accepted" | "rejected" | "countered";
-  @IsInt() @Min(1) counterAmountCents?: number;
+  @IsIn(["accepted", "rejected", "countered"]) decision!: "accepted" | "rejected" | "countered";
+  @IsOptional() @IsInt() @Min(1) counterAmountCents?: number;
 }
 
 @Controller("offers")
